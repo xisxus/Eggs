@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>🥚 EggTrack</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['DM Sans','sans-serif'],mono:['DM Mono','monospace']},colors:{brand:{50:'#fff8ed',100:'#ffefd3',200:'#ffd9a0',300:'#ffbc5e',400:'#ff9a20',500:'#f97c07',600:'#de5d02',700:'#b84008',800:'#93310f',900:'#7a2a10'}}}}}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;transition:background .3s,color .3s}
+html.light body{background:#f5f3ef;color:#1a1a1a}
+html.light .card{background:#fff;box-shadow:0 2px 20px -4px rgba(0,0,0,.08)}
+html.light .sidebar{background:#fff;border-right:1px solid #ede9e2}
+html.light .nav-item.active{background:#fff8ed;color:#de5d02}
+html.light .nav-item:hover:not(.active){background:#faf8f4}
+html.light .inp{background:#fafaf8;border:1.5px solid #e5e1d8;color:#1a1a1a}
+html.light .inp:focus{border-color:#f97c07;background:#fff}
+html.light .badge-warm{background:#fff3e0;color:#c54d00}
+html.light .tbl-head{background:#f9f6f1}
+html.light .tbl-row:hover{background:#fdf9f4}
+html.light .divider{border-color:#ede9e2}
+html.light .muted{color:#7a7268}
+html.light .glass{background:rgba(255,255,255,.72);backdrop-filter:blur(12px)}
+html.light .tag{background:#f0ece5;color:#5c5447}
+html.light .switch-bg{background:#e0dbd2}
+html.light .switch-bg.on{background:#f97c07}
+html.dark body{background:#0d0f12;color:#e8e3d9}
+html.dark .card{background:#1e2230;box-shadow:0 2px 24px -4px rgba(0,0,0,.5)}
+html.dark .sidebar{background:#161920;border-right:1px solid #252a3a}
+html.dark .nav-item.active{background:#252a3a;color:#ffbc5e}
+html.dark .nav-item:hover:not(.active){background:#1e2230}
+html.dark .inp{background:#161920;border:1.5px solid #2e3548;color:#e8e3d9}
+html.dark .inp:focus{border-color:#f97c07;background:#1e2230}
+html.dark .badge-warm{background:#3d2200;color:#ffbc5e}
+html.dark .tbl-head{background:#161920}
+html.dark .tbl-row:hover{background:#252a3a}
+html.dark .divider{border-color:#252a3a}
+html.dark .muted{color:#7a8099}
+html.dark .glass{background:rgba(22,25,32,.82);backdrop-filter:blur(12px)}
+html.dark .tag{background:#252a3a;color:#9aa0b8}
+html.dark .switch-bg{background:#2e3548}
+html.dark .switch-bg.on{background:#f97c07}
+.inp{width:100%;border-radius:10px;padding:.55rem .85rem;outline:none;font-family:inherit;font-size:.92rem;transition:border-color .2s,background .2s}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.55rem 1.2rem;border-radius:10px;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .18s;border:none;white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,#f97c07,#de5d02);color:#fff;box-shadow:0 2px 12px rgba(249,124,7,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(249,124,7,.4)}
+.btn-ghost{background:transparent;border:1.5px solid currentColor;opacity:.7}
+.btn-ghost:hover{opacity:1}
+.btn-danger{background:#fee2e2;color:#b91c1c}
+.btn-danger:hover{background:#fecaca}
+html.dark .btn-danger{background:#3d1515;color:#f87171}
+.btn-sm{padding:.35rem .8rem;font-size:.82rem;border-radius:8px}
+.btn-success{background:#d1fae5;color:#065f46}
+html.dark .btn-success{background:#052e16;color:#6ee7b7}
+.btn-off{background:#fef3c7;color:#92400e}
+html.dark .btn-off{background:#422006;color:#fde68a}
+.card{border-radius:16px}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+.nav-item{display:flex;align-items:center;gap:.7rem;padding:.62rem 1rem;border-radius:12px;cursor:pointer;font-weight:500;font-size:.92rem;transition:all .18s}
+.page{display:none;animation:slideUp .4s cubic-bezier(.16,1,.3,1) forwards}
+.page.active{display:block}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .2s ease}
+.modal{border-radius:20px;width:100%;max-width:440px;animation:pop .25s cubic-bezier(.16,1,.3,1);max-height:92vh;overflow-y:auto}
+.toggle-dot{width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:transform .2s}
+.switch-bg{width:44px;height:24px;border-radius:999px;transition:background .2s;display:flex;align-items:center;padding:2px;cursor:pointer}
+.switch-bg.on .toggle-dot{transform:translateX(20px)}
+.stat-card{border-radius:14px;padding:1.1rem 1.3rem}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#c0b8a8;border-radius:99px}
+html.dark ::-webkit-scrollbar-thumb{background:#3d4560}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;padding:.75rem 1.2rem;border-radius:12px;font-weight:500;font-size:.9rem;animation:slideUp .3s ease forwards;max-width:320px}
+.toast-success{background:#d1fae5;color:#065f46}
+.toast-error{background:#fee2e2;color:#991b1b}
+.toast-info{background:#dbeafe;color:#1e40af}
+html.dark .toast-success{background:#14452f;color:#6ee7b7}
+html.dark .toast-error{background:#450a0a;color:#fca5a5}
+html.dark .toast-info{background:#1e3a5f;color:#93c5fd}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.65rem 1rem;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+td{padding:.75rem 1rem;font-size:.9rem}
+.tbl-row td{border-top:1px solid}
+html.light .tbl-row td{border-color:#f0ece3}
+html.dark .tbl-row td{border-color:#252a3a}
+.already-badge{background:#fef9c3;color:#854d0e;border:1px solid #fde047}
+html.dark .already-badge{background:#422006;color:#fde68a;border:1px solid #92400e}
+.pre-badge{display:inline-flex;align-items:center;gap:4px;background:#ede9fe;color:#6d28d9;border-radius:6px;padding:2px 8px;font-size:.75rem;font-weight:600}
+html.dark .pre-badge{background:#2e1065;color:#c4b5fd}
+.off-row{opacity:.5}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.animate-spin-slow{animation:spin 3s linear infinite}
+.animate-pulse-soft{animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@media(max-width:768px){
+  .sidebar-wrap{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);display:none}
+  .sidebar-wrap.open{display:flex}
+  .sidebar{width:260px;height:100vh;overflow-y:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+  <div style="position:absolute;inset:0;overflow:hidden;z-index:0">
+    <div style="position:absolute;top:-20%;right:-10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(249,124,7,.15) 0%,transparent 70%)"></div>
+    <div style="position:absolute;bottom:-20%;left:-10%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(222,93,2,.1) 0%,transparent 70%)"></div>
+  </div>
+  <div class="card p-8 w-full max-w-sm relative z-10" style="animation:slideUp .4s cubic-bezier(.16,1,.3,1) forwards">
+    <div class="text-center mb-8">
+      <div style="font-size:3rem;line-height:1" class="mb-3">🥚</div>
+      <h1 class="text-2xl font-bold tracking-tight">EggTrack</h1>
+      <p class="muted text-sm mt-1">Daily egg consumption manager</p>
+    </div>
+    <div id="loginError" class="hidden mb-4 p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 rounded-xl"></div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1.5">Username</label>
+        <input id="loginUser" class="inp" type="text" placeholder="Enter username" autocomplete="username"/>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1.5">Password</label>
+        <div class="relative">
+          <input id="loginPass" class="inp pr-10" type="password" placeholder="••••••••" autocomplete="current-password"/>
+          <button onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 muted text-lg">👁</button>
+        </div>
+      </div>
+      <button onclick="doLogin()" class="btn btn-primary w-full justify-center py-3 mt-2">Sign in →</button>
+    </div>
+    <div class="mt-6 text-center">
+      <button onclick="toggleDark()" class="muted text-sm"><span id="themeLoginIcon">🌙</span> Toggle theme</button>
+    </div>
+    <p class="text-center muted text-xs mt-4">v4.0 · Powered by Google Sheets</p>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="appShell" class="hidden min-h-screen flex">
+  <div class="sidebar-wrap" id="sidebarOverlay" onclick="closeSidebar()">
+    <div class="sidebar p-4" onclick="e=>e.stopPropagation()"><div id="sidebarContent"></div></div>
+  </div>
+  <aside class="sidebar hidden md:flex flex-col w-60 min-h-screen p-4 fixed left-0 top-0 bottom-0 overflow-y-auto" id="desktopSidebar">
+    <div id="desktopSidebarContent"></div>
+  </aside>
+  <main class="flex-1 flex flex-col md:ml-60">
+    <header class="glass sticky top-0 z-30 flex items-center justify-between px-5 py-3 border-b divider">
+      <div class="flex items-center gap-3">
+        <button class="md:hidden btn btn-ghost btn-sm p-2" onclick="openSidebar()">☰</button>
+        <span id="pageTitle" class="font-semibold text-base"></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="switch-bg" id="themeSwitch" onclick="toggleDark()"><div class="toggle-dot"></div></div>
+        <div class="flex items-center gap-2">
+          <div id="topAvatar" class="avatar bg-orange-100 text-orange-700"></div>
+          <div class="hidden sm:block">
+            <div class="font-semibold text-sm" id="topName"></div>
+            <div class="muted text-xs" id="topRole"></div>
+          </div>
+        </div>
+        <button onclick="doLogout()" class="btn btn-ghost btn-sm text-xs">Logout</button>
+      </div>
+    </header>
+
+    <div class="flex-1 p-4 md:p-6 overflow-y-auto">
+
+      <!-- ADMIN DASHBOARD -->
+      <div class="page" id="pgAdminDash">
+        <!-- Cash highlight -->
+        <div class="card p-5 mb-4" style="background:linear-gradient(135deg,#1e3a5f,#2e4a7f);color:#fff">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <div class="text-xs font-semibold uppercase tracking-widest opacity-70 mb-1">💵 Cash in Hand</div>
+              <div class="text-4xl font-bold font-mono" id="adCashInHand">—</div>
+              <div class="text-xs opacity-60 mt-1">Total received − egg purchases − misc costs</div>
+            </div>
+            <div class="text-6xl opacity-20">💵</div>
+          </div>
+        </div>
+        <!-- Money row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <div class="stat-card card"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Egg Cost</div><div class="text-xl font-bold font-mono" id="adTotalCost">—</div><div class="muted text-xs mt-1">FIFO calculated</div></div>
+          <div class="stat-card card" style="background:#f0fdf4"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Collected</div><div class="text-xl font-bold font-mono text-green-600" id="adTotalCollected">—</div><div class="muted text-xs mt-1">payments in</div></div>
+          <div class="stat-card card" style="background:#fef2f2"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Outstanding</div><div class="text-xl font-bold font-mono text-red-500" id="adTotalOutstanding">—</div><div class="muted text-xs mt-1">total dues</div></div>
+          <div class="stat-card card" style="background:#eff6ff"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Misc Spent</div><div class="text-xl font-bold font-mono text-blue-500" id="adTotalMisc">—</div></div>
+        </div>
+        <!-- Stock row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <div class="stat-card card"><div class="text-2xl mb-1">🛒</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Bought</div><div class="text-xl font-bold font-mono" id="adTotalBought">—</div></div>
+          <div class="stat-card card"><div class="text-2xl mb-1">🍳</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Consumed</div><div class="text-xl font-bold font-mono" id="adTotalConsumed">—</div></div>
+          <div class="stat-card card" style="background:#fef2f2"><div class="text-2xl mb-1">🗑️</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Destroyed</div><div class="text-xl font-bold font-mono text-red-500" id="adTotalDestroyed">—</div></div>
+          <div class="stat-card card" style="background:#f0fdf4"><div class="text-2xl mb-1">📦</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">In Stock</div><div class="text-xl font-bold font-mono text-green-600" id="adStock">—</div></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="card p-5"><h3 class="font-semibold mb-4">💳 User Balances</h3><div id="adUserBalances"><div class="muted text-sm py-4 text-center">Loading…</div></div></div>
+          <div class="card p-5"><h3 class="font-semibold mb-4">🕐 Recent Activity</h3><div id="adRecentActivity"><div class="muted text-sm py-4 text-center">Loading…</div></div></div>
+        </div>
+      </div>
+
+      <!-- USER DASHBOARD -->
+      <div class="page" id="pgDashboard">
+        <!-- Quota + Consumed top row -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div class="stat-card card col-span-1 sm:col-span-2 flex items-center gap-5">
+            <div style="font-size:2.4rem;line-height:1" class="animate-pulse-soft">🥚</div>
+            <div class="flex-1">
+              <div class="muted text-xs font-medium uppercase tracking-wide mb-1">Today's Quota</div>
+              <div class="text-4xl font-bold" id="dashQuotaNum">—</div>
+              <div class="muted text-xs mt-1" id="dashQuotaLabel">eggs allocated for today</div>
+            </div>
+            <div class="flex gap-2" id="dashQuotaBtns">
+              <button onclick="openQuotaModal()" class="btn btn-primary btn-sm" id="dashEditBtn">Edit</button>
+            </div>
+          </div>
+          <div class="stat-card card">
+            <div class="muted text-xs font-medium uppercase tracking-wide mb-2">Consumed Today</div>
+            <div class="text-3xl font-bold" id="dashConsumed">—</div>
+            <div class="muted text-xs mt-1" id="dashConsumedLabel">logged by admin</div>
+          </div>
+        </div>
+
+        <!-- Pre-defined consumption section -->
+        <div class="card p-5 mb-4">
+          <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
+            <div>
+              <h3 class="font-semibold">🎯 Pre-defined Consumption</h3>
+              <p class="muted text-xs mt-1">Set expected eggs for today or any future date. Admin will auto-fill this. Set 0 or press OFF to skip.</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3 items-end">
+            <div>
+              <label class="block text-xs font-medium mb-1 muted">Date</label>
+              <input type="date" id="preDate" class="inp" style="width:160px" onchange="checkPreConsumedLock()"/>
+            </div>
+            <div>
+              <label class="block text-xs font-medium mb-1 muted">Qty</label>
+              <input type="number" min="0" max="99" id="preQty" class="inp text-center font-mono font-bold" style="width:80px" placeholder="0"/>
+            </div>
+            <button onclick="savePredefined()" class="btn btn-primary btn-sm">💾 Save</button>
+            <button onclick="setOffPredefined()" class="btn btn-off btn-sm">⛔ OFF (0)</button>
+          </div>
+          <div id="preLockMsg" class="hidden mt-3 text-xs text-orange-600 font-medium">⚠️ Admin already entered consumption for this date — cannot change.</div>
+          <!-- Upcoming predefined list -->
+          <div id="preList" class="mt-4"></div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <div class="stat-card card"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Consumed</div><div class="text-xl font-bold font-mono" id="dashTotalConsumed">—</div><div class="muted text-xs mt-1">eggs all time</div></div>
+          <div class="stat-card card"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Est. Cost</div><div class="text-xl font-bold font-mono" id="dashEstCost">—</div></div>
+          <div class="stat-card card" style="background:#f0fdf4"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Paid</div><div class="text-xl font-bold font-mono text-green-600" id="dashTotalPaid">—</div></div>
+          <div class="stat-card card" id="dashBalCard"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Balance</div><div class="text-xl font-bold font-mono" id="dashBalance">—</div><div class="muted text-xs mt-1" id="dashBalLabel">—</div></div>
+        </div>
+
+        <!-- Change password -->
+        <div class="card p-5 mb-4">
+          <h3 class="font-semibold mb-3">🔒 Change Password</h3>
+          <div class="flex flex-wrap gap-3 items-end">
+            <div><label class="block text-xs font-medium mb-1 muted">Current Password</label><input type="password" id="pwOld" class="inp" style="width:160px" placeholder="current"/></div>
+            <div><label class="block text-xs font-medium mb-1 muted">New Password</label><input type="password" id="pwNew" class="inp" style="width:160px" placeholder="new"/></div>
+            <div><label class="block text-xs font-medium mb-1 muted">Confirm New</label><input type="password" id="pwConfirm" class="inp" style="width:160px" placeholder="confirm"/></div>
+            <button onclick="doChangePassword()" class="btn btn-primary btn-sm">Update</button>
+          </div>
+        </div>
+
+        <!-- Recent consumption -->
+        <div class="card p-5">
+          <h3 class="font-semibold mb-4">📅 Recent Consumption</h3>
+          <div id="dashRecentTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- DAILY CONSUMPTION -->
+      <div class="page" id="pgDailyInput">
+        <div class="card p-5 mb-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div><h2 class="font-bold text-lg">Daily Consumption</h2><p class="muted text-sm" id="dailyDateLabel"></p></div>
+            <div class="flex gap-2 flex-wrap items-center">
+              <input type="date" id="dailyDatePicker" class="inp" style="width:auto" onchange="loadDailyConsumption()"/>
+              <button onclick="submitConsumption()" class="btn btn-primary">💾 Save All</button>
+            </div>
+          </div>
+          <div id="alreadyBadge" class="hidden already-badge rounded-xl px-4 py-2 mb-4 text-sm font-semibold">⚠️ Data already entered for this date — editing existing records</div>
+          <div class="badge-warm rounded-xl mb-4 flex items-center gap-3 p-3">
+            <span class="text-2xl">🍳</span>
+            <div><div class="font-semibold text-sm">Total to boil today</div><div class="font-bold text-xl font-mono" id="totalBoilCount">— eggs</div></div>
+          </div>
+          <div id="dailyConsTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- PAYMENTS -->
+      <div class="page" id="pgPayments">
+        <div class="card p-5 mb-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <h2 class="font-bold text-lg">Payments</h2>
+            <button onclick="openPaymentModal()" class="btn btn-primary">+ Add Payment</button>
+          </div>
+          <div id="paymentsTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- EGG BUYS -->
+      <div class="page" id="pgEggBuys">
+        <div class="card p-5 mb-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <h2 class="font-bold text-lg">Egg Purchases</h2>
+            <button onclick="openBuyModal()" class="btn btn-primary">+ Record Purchase</button>
+          </div>
+          <div id="eggBuysTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- EGG DESTROY -->
+      <div class="page" id="pgEggDestroy">
+        <div class="card p-5 mb-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div><h2 class="font-bold text-lg">Egg Destroy / Wastage</h2><p class="muted text-sm">Cost split across all users by consumption %</p></div>
+            <button onclick="openDestroyModal()" class="btn btn-primary">+ Record Destroy</button>
+          </div>
+          <div id="eggDestroyTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- MISC COST -->
+      <div class="page" id="pgMiscCost">
+        <div class="card p-5 mb-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div><h2 class="font-bold text-lg">Misc Cost</h2><p class="muted text-sm">Shared expenses split by consumption %</p></div>
+            <button onclick="openMiscModal()" class="btn btn-primary">+ Add Misc Cost</button>
+          </div>
+          <div id="miscCostTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- FIFO REPORT -->
+      <div class="page" id="pgFifoReport">
+        <div class="card p-5 mb-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <h2 class="font-bold text-lg">FIFO Cost Report</h2>
+            <div class="flex gap-2">
+              <button onclick="refreshFifoSheet()" class="btn btn-success btn-sm">📊 Sync to Excel</button>
+              <button onclick="loadFifoReport()" class="btn btn-ghost btn-sm">↺ Refresh</button>
+            </div>
+          </div>
+          <div id="fifoReportTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="page" id="pgUsers">
+        <div class="card p-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <h2 class="font-bold text-lg">User Management</h2>
+            <button onclick="openUserModal()" class="btn btn-primary">+ New User</button>
+          </div>
+          <div id="usersTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- QUOTAS -->
+      <div class="page" id="pgQuotas">
+        <div class="card p-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <h2 class="font-bold text-lg">Quota Management</h2>
+            <button onclick="saveAllQuotas()" class="btn btn-primary">💾 Save Quotas</button>
+          </div>
+          <div id="quotasTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODALS -->
+<div id="quotaModal" class="modal-bg hidden">
+  <div class="modal card p-6">
+    <h3 class="font-bold text-lg mb-1">Edit Today's Quota</h3>
+    <p class="muted text-sm mb-5">Editable until 9:00 AM.</p>
+    <div class="mb-4"><label class="block text-sm font-medium mb-1.5">Qty (0 = OFF)</label>
+      <input id="quotaInput" type="number" min="0" max="99" class="inp text-xl font-bold text-center" placeholder="0"/></div>
+    <div class="flex gap-3">
+      <button onclick="saveQuota()" class="btn btn-primary flex-1 justify-center">Save</button>
+      <button onclick="closeModal('quotaModal')" class="btn btn-ghost flex-1 justify-center">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="paymentModal" class="modal-bg hidden">
+  <div class="modal card p-6">
+    <h3 class="font-bold text-lg mb-5">Record Payment</h3>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-1.5">User</label><select id="pmtUser" class="inp"></select></div>
+      <div><label class="block text-sm font-medium mb-1.5">Date</label><input id="pmtDate" type="date" class="inp"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Amount (৳)</label><input id="pmtAmount" type="number" min="1" class="inp" placeholder="0"/></div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="savePayment()" class="btn btn-primary flex-1 justify-center">Save</button>
+        <button onclick="closeModal('paymentModal')" class="btn btn-ghost flex-1 justify-center">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="buyModal" class="modal-bg hidden">
+  <div class="modal card p-6">
+    <h3 class="font-bold text-lg mb-5">Record Egg Purchase</h3>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-1.5">Date</label><input id="buyDate" type="date" class="inp"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Qty Bought</label><input id="buyQty" type="number" min="1" class="inp" placeholder="0"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Total Price (৳)</label><input id="buyTotal" type="number" min="1" class="inp" placeholder="0"/></div>
+      <div class="muted text-sm">Unit cost: <span id="buyUnitCost" class="font-mono font-semibold">—</span> ৳/egg</div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="saveBuy()" class="btn btn-primary flex-1 justify-center">Save</button>
+        <button onclick="closeModal('buyModal')" class="btn btn-ghost flex-1 justify-center">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="userModal" class="modal-bg hidden">
+  <div class="modal card p-6">
+    <h3 class="font-bold text-lg mb-5" id="userModalTitle">Create User</h3>
+    <input type="hidden" id="editUserId"/>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-1.5">Username</label><input id="newUsername" type="text" class="inp" placeholder="john_doe"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Display Name</label><input id="newName" type="text" class="inp" placeholder="John Doe"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Password</label><input id="newPassword" type="password" class="inp" placeholder="Leave blank to keep existing"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Role</label>
+        <select id="newRole" class="inp"><option value="user">User</option><option value="admin">Admin</option></select></div>
+      <div><label class="block text-sm font-medium mb-1.5">Target Payment (৳/month)</label><input id="newTarget" type="number" min="0" class="inp" placeholder="500"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Initial Balance (৳)</label><input id="newBalance" type="number" class="inp" placeholder="0"/></div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="saveUser()" class="btn btn-primary flex-1 justify-center">Save</button>
+        <button onclick="closeModal('userModal')" class="btn btn-ghost flex-1 justify-center">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="destroyModal" class="modal-bg hidden">
+  <div class="modal card p-6">
+    <h3 class="font-bold text-lg mb-5">Record Egg Destroy</h3>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-1.5">Date</label><input id="destroyDate" type="date" class="inp"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Qty Destroyed</label><input id="destroyQty" type="number" min="1" class="inp" placeholder="0"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Note</label><input id="destroyNote" type="text" class="inp" placeholder="Broken, spoiled…"/></div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="saveDestroy()" class="btn btn-primary flex-1 justify-center">Save</button>
+        <button onclick="closeModal('destroyModal')" class="btn btn-ghost flex-1 justify-center">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="miscModal" class="modal-bg hidden">
+  <div class="modal card p-6">
+    <h3 class="font-bold text-lg mb-5">Add Misc Cost</h3>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-1.5">Date</label><input id="miscDate" type="date" class="inp"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Amount (৳)</label><input id="miscAmount" type="number" min="1" class="inp" placeholder="0"/></div>
+      <div><label class="block text-sm font-medium mb-1.5">Note</label><input id="miscNote" type="text" class="inp" placeholder="Gas, salt…"/></div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="saveMisc()" class="btn btn-primary flex-1 justify-center">Save</button>
+        <button onclick="closeModal('miscModal')" class="btn btn-ghost flex-1 justify-center">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loadingOverlay" class="fixed inset-0 z-50 flex items-center justify-center hidden" style="background:rgba(0,0,0,.45);backdrop-filter:blur(4px)">
+  <div class="card p-6 flex flex-col items-center gap-4">
+    <div class="text-4xl animate-spin-slow">🥚</div>
+    <div class="font-medium" id="loadingMsg">Processing…</div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const API_URL = "https://script.google.com/macros/s/AKfycbye_yD2mLvP8TSMzNwY0gq8BT08_tl79WvRAHannnxkGxsTux7un24WHYcNxKbuYwIi/exec";
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let session = null;
+let usersCache = [];
+
+// ── THEME ────────────────────────────────────────────────────────────────────
+function initTheme(){
+  const dark = localStorage.getItem('theme')==='dark';
+  document.documentElement.classList.toggle('dark',dark);
+  document.documentElement.classList.toggle('light',!dark);
+  const sw=document.getElementById('themeSwitch');
+  if(sw) sw.classList.toggle('on',dark);
+  const li=document.getElementById('themeLoginIcon');
+  if(li) li.textContent=dark?'☀️':'🌙';
+}
+function toggleDark(){
+  localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'light':'dark');
+  initTheme();
+}
+
+// ── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg,type='info'){
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+// ── LOADING ──────────────────────────────────────────────────────────────────
+function showLoading(msg='Processing…'){ document.getElementById('loadingMsg').textContent=msg; document.getElementById('loadingOverlay').classList.remove('hidden'); }
+function hideLoading(){ document.getElementById('loadingOverlay').classList.add('hidden'); }
+
+// ── API ──────────────────────────────────────────────────────────────────────
+async function api(action,data={}){
+  const payload={action,token:session?.token||'',...data};
+  const res=await fetch(`${API_URL}?${new URLSearchParams({payload:JSON.stringify(payload)})}`,{method:'GET'});
+  try{ return JSON.parse(await res.text()); }catch(e){ throw new Error('Bad response'); }
+}
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+function togglePw(){ const f=document.getElementById('loginPass'); f.type=f.type==='password'?'text':'password'; }
+
+async function doLogin(){
+  const username=document.getElementById('loginUser').value.trim();
+  const password=document.getElementById('loginPass').value;
+  if(!username||!password){ toast('Enter credentials','error'); return; }
+  showLoading('Signing in…');
+  try{
+    const r=await api('login',{username,password});
+    if(r.success){
+      session=r.session;
+      localStorage.setItem('session',JSON.stringify(session));
+      showApp();
+    } else {
+      document.getElementById('loginError').classList.remove('hidden');
+      document.getElementById('loginError').textContent=r.error||'Invalid credentials';
+    }
+  }catch(e){
+    // demo fallback
+    const demos={superadmin:{pw:'admin123',role:'superadmin',name:'Super Admin',id:'U0'},admin:{pw:'admin123',role:'admin',name:'Admin User',id:'U1'},user:{pw:'user123',role:'user',name:'Demo User',id:'U2'}};
+    const d=demos[username];
+    if(d&&d.pw===password){
+      session={userId:d.id,username,name:d.name,role:d.role,token:'demo-token'};
+      localStorage.setItem('session',JSON.stringify(session));
+      showApp(); toast('⚠️ Demo mode','info');
+    } else {
+      document.getElementById('loginError').classList.remove('hidden');
+      document.getElementById('loginError').textContent='Invalid credentials';
+    }
+  }
+  hideLoading();
+}
+
+function doLogout(){ localStorage.removeItem('session'); session=null; document.getElementById('appShell').classList.add('hidden'); document.getElementById('loginPage').classList.remove('hidden'); }
+
+// ── APP ──────────────────────────────────────────────────────────────────────
+function showApp(){
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('appShell').classList.remove('hidden');
+  buildSidebar(); updateTopBar();
+  // Admin → daily consumption with today; user → dashboard
+  if(session.role==='user') navigateTo('pgDashboard');
+  else navigateTo('pgDailyInput');
+}
+
+function buildSidebar(){
+  const role=session.role;
+  const items=[];
+  if(role==='user') items.push({id:'pgDashboard',icon:'📊',label:'My Dashboard'});
+  if(role==='admin'||role==='superadmin'){
+    items.push({id:'pgAdminDash',  icon:'🏠',label:'Admin Dashboard'});
+    items.push({id:'pgDailyInput', icon:'🍳',label:'Daily Consumption'});
+    items.push({id:'pgPayments',   icon:'💳',label:'Payments'});
+    items.push({id:'pgEggBuys',    icon:'🛒',label:'Egg Purchases'});
+    items.push({id:'pgEggDestroy', icon:'🗑️',label:'Egg Destroy'});
+    items.push({id:'pgMiscCost',   icon:'💸',label:'Misc Cost'});
+    items.push({id:'pgFifoReport', icon:'📈',label:'FIFO Report'});
+    items.push({id:'pgQuotas',     icon:'📋',label:'Quotas'});
+  }
+  if(role==='superadmin') items.push({id:'pgUsers',icon:'👥',label:'Users'});
+  const html=`
+    <div class="flex items-center gap-2 px-2 py-3 mb-4"><span class="text-2xl">🥚</span><span class="font-bold text-base">EggTrack</span></div>
+    <div class="space-y-1">${items.map(it=>`<div class="nav-item" id="nav-${it.id}" onclick="navigateTo('${it.id}')"><span>${it.icon}</span><span>${it.label}</span></div>`).join('')}</div>
+    <div class="mt-auto pt-6 border-t divider" style="margin-top:auto">
+      <div class="flex items-center gap-2 px-2 py-2">
+        <div class="avatar" style="background:#fff3e0;color:#c54d00">${session.name.charAt(0).toUpperCase()}</div>
+        <div class="min-w-0"><div class="font-semibold text-sm truncate">${session.name}</div><div class="muted text-xs capitalize">${session.role}</div></div>
+      </div>
+    </div>`;
+  document.getElementById('desktopSidebarContent').innerHTML=html;
+  document.getElementById('sidebarContent').innerHTML=html;
+}
+
+function updateTopBar(){
+  document.getElementById('topName').textContent=session.name;
+  document.getElementById('topRole').textContent=session.role.charAt(0).toUpperCase()+session.role.slice(1);
+  document.getElementById('topAvatar').textContent=session.name.charAt(0).toUpperCase();
+}
+
+const PAGE_LABELS={pgAdminDash:'Admin Dashboard',pgDashboard:'My Dashboard',pgDailyInput:'Daily Consumption',pgPayments:'Payments',pgEggBuys:'Egg Purchases',pgEggDestroy:'Egg Destroy',pgMiscCost:'Misc Cost',pgFifoReport:'FIFO Report',pgUsers:'Users',pgQuotas:'Quotas'};
+
+function navigateTo(pageId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(pageId)?.classList.add('active');
+  document.getElementById('nav-'+pageId)?.classList.add('active');
+  document.getElementById('pageTitle').textContent=PAGE_LABELS[pageId]||'';
+  closeSidebar();
+  loadPageData(pageId);
+}
+
+function openSidebar(){ document.getElementById('sidebarOverlay').classList.add('open'); }
+function closeSidebar(){ document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+function loadPageData(page){
+  switch(page){
+    case 'pgAdminDash':  loadAdminDashboard(); break;
+    case 'pgDashboard':  loadUserDashboard(); break;
+    case 'pgDailyInput': initDailyPage(); break;
+    case 'pgPayments':   loadPayments(); break;
+    case 'pgEggBuys':    loadEggBuys(); break;
+    case 'pgEggDestroy': loadEggDestroy(); break;
+    case 'pgMiscCost':   loadMiscCost(); break;
+    case 'pgFifoReport': loadFifoReport(); break;
+    case 'pgUsers':      loadUsers(); break;
+    case 'pgQuotas':     loadQuotas(); break;
+  }
+}
+
+// ── ADMIN DASHBOARD ──────────────────────────────────────────────────────────
+async function loadAdminDashboard(){
+  ['adCashInHand','adTotalCost','adTotalCollected','adTotalOutstanding','adTotalMisc','adTotalBought','adTotalConsumed','adTotalDestroyed','adStock'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent='…'; });
+  try{
+    const r=await api('getAdminDashboard');
+    if(!r.success){ toast(r.error,'error'); return; }
+    const d=r.data;
+    document.getElementById('adCashInHand').textContent     ='৳'+d.cashInHand.toLocaleString();
+    document.getElementById('adTotalCost').textContent      ='৳'+d.totalCostFifo.toLocaleString();
+    document.getElementById('adTotalCollected').textContent ='৳'+d.totalCollected.toLocaleString();
+    document.getElementById('adTotalOutstanding').textContent='৳'+d.totalOutstanding.toLocaleString();
+    document.getElementById('adTotalMisc').textContent      ='৳'+d.totalMisc.toLocaleString();
+    document.getElementById('adTotalBought').textContent    =d.totalBought.toLocaleString()+' eggs';
+    document.getElementById('adTotalConsumed').textContent  =d.totalConsumed.toLocaleString()+' eggs';
+    document.getElementById('adTotalDestroyed').textContent =d.totalDestroyed.toLocaleString()+' eggs';
+    document.getElementById('adStock').textContent          =d.stockRemaining.toLocaleString()+' eggs';
+    const balRows=(d.userBalances||[]).map(u=>{
+      const color=u.needToPay>0?'color:#b91c1c':'color:#166534';
+      return `<tr class="tbl-row"><td class="font-medium text-sm">${u.name}</td><td class="font-mono text-sm">${u.consumedQty}</td><td class="font-mono text-sm">৳${u.totalCost.toLocaleString()}</td><td class="font-mono text-sm">৳${u.totalPaid.toLocaleString()}</td><td class="font-mono font-bold text-sm" style="${color}">৳${Math.abs(u.needToPay).toLocaleString()} <span class="text-xs font-normal">${u.needToPay>0?'Owes':'Credit'}</span></td></tr>`;
+    }).join('');
+    document.getElementById('adUserBalances').innerHTML=balRows?`<table><thead class="tbl-head"><tr><th>User</th><th>Qty</th><th>Cost</th><th>Paid</th><th>Balance</th></tr></thead><tbody>${balRows}</tbody></table>`:'<p class="muted text-sm py-4 text-center">No data</p>';
+    const actRows=(d.recentActivity||[]).map(a=>`<div class="flex items-center justify-between py-2 border-b divider last:border-0"><div class="flex items-center gap-2"><div class="avatar" style="background:#fff3e0;color:#c54d00;width:30px;height:30px;font-size:.75rem">${a.userName.charAt(0)}</div><div><div class="font-medium text-sm">${a.userName}</div><div class="muted text-xs">${a.date}</div></div></div><span class="badge-warm px-2 py-0.5 rounded-lg text-xs font-semibold">${a.qty} eggs</span></div>`).join('');
+    document.getElementById('adRecentActivity').innerHTML=actRows||'<p class="muted text-sm py-4 text-center">No activity</p>';
+  }catch(e){
+    toast('Demo mode','info');
+    document.getElementById('adCashInHand').textContent='৳1,200';
+    document.getElementById('adTotalCost').textContent='৳4,200';
+    document.getElementById('adTotalCollected').textContent='৳3,500';
+    document.getElementById('adTotalOutstanding').textContent='৳700';
+    document.getElementById('adTotalMisc').textContent='৳110';
+    document.getElementById('adTotalBought').textContent='450 eggs';
+    document.getElementById('adTotalConsumed').textContent='390 eggs';
+    document.getElementById('adTotalDestroyed').textContent='8 eggs';
+    document.getElementById('adStock').textContent='52 eggs';
+    document.getElementById('adUserBalances').innerHTML='<p class="muted text-sm py-4 text-center">Demo mode</p>';
+    document.getElementById('adRecentActivity').innerHTML='<p class="muted text-sm py-4 text-center">Demo mode</p>';
+  }
+}
+
+// ── USER DASHBOARD ───────────────────────────────────────────────────────────
+async function loadUserDashboard(){
+  const today=todayStr();
+  document.getElementById('preDate').value=today;
+  try{
+    const r=await api('getDashboard',{date:today});
+    if(!r.success){ toast(r.error,'error'); return; }
+    const d=r.data;
+    document.getElementById('dashQuotaNum').textContent=d.quota??'—';
+    // consumed: -1 = not yet entered
+    if(d.consumed<0){
+      document.getElementById('dashConsumed').textContent='—';
+      document.getElementById('dashConsumedLabel').textContent='admin not yet entered';
+    } else {
+      document.getElementById('dashConsumed').textContent=d.consumed;
+      document.getElementById('dashConsumedLabel').textContent='logged by admin';
+    }
+    document.getElementById('dashTotalConsumed').textContent=(d.totalConsumed||0).toLocaleString();
+    document.getElementById('dashEstCost').textContent='৳'+(d.estimatedCost||0).toLocaleString();
+    document.getElementById('dashTotalPaid').textContent='৳'+(d.totalPaid||0).toLocaleString();
+    const bal=d.balance||0;
+    document.getElementById('dashBalance').textContent='৳'+Math.abs(bal).toLocaleString();
+    document.getElementById('dashBalance').style.color=bal>=0?'#16a34a':'#dc2626';
+    document.getElementById('dashBalLabel').textContent=bal>=0?'in credit':'you owe';
+    // quota lock
+    const canEdit=new Date().getHours()<9;
+    document.getElementById('dashEditBtn').classList.toggle('hidden',!canEdit);
+    if(!canEdit) document.getElementById('dashQuotaLabel').textContent='Quota locked after 9:00 AM';
+    // recent
+    const rows=(d.recent||[]).map(r=>`<tr class="tbl-row"><td>${r.date}</td><td><span class="badge-warm px-2 py-0.5 rounded-lg text-xs font-semibold">${r.qty} eggs</span></td></tr>`).join('');
+    document.getElementById('dashRecentTable').innerHTML=`<table><thead class="tbl-head"><tr><th>Date</th><th>Qty</th></tr></thead><tbody>${rows||'<tr><td colspan="2" class="muted text-center py-4 text-sm">No records yet</td></tr>'}</tbody></table>`;
+    // predefined list
+    renderPreList(d.allPredefined||[]);
+  }catch(e){
+    toast('Demo mode','info');
+    document.getElementById('dashQuotaNum').textContent='6';
+    document.getElementById('dashConsumed').textContent='6';
+    document.getElementById('dashTotalConsumed').textContent='120';
+    document.getElementById('dashEstCost').textContent='৳1,440';
+    document.getElementById('dashTotalPaid').textContent='৳1,500';
+    document.getElementById('dashBalance').textContent='৳60';
+    document.getElementById('dashBalLabel').textContent='in credit';
+  }
+}
+
+function renderPreList(all){
+  const today=todayStr();
+  const upcoming=all.filter(x=>x.date>=today);
+  if(!upcoming.length){ document.getElementById('preList').innerHTML='<p class="muted text-xs">No upcoming pre-defined entries.</p>'; return; }
+  const rows=upcoming.map(x=>`
+    <div class="flex items-center justify-between py-1.5 border-b divider last:border-0">
+      <div class="flex items-center gap-2">
+        <span class="font-mono text-sm">${x.date}</span>
+        ${x.qty===0?'<span class="text-xs text-orange-600 font-semibold">⛔ OFF</span>':'<span class="pre-badge">🎯 '+x.qty+' eggs</span>'}
+      </div>
+      <button onclick="clearPre('${x.date}')" class="btn btn-danger btn-sm py-0.5 px-2 text-xs">Remove</button>
+    </div>`).join('');
+  document.getElementById('preList').innerHTML=`<div class="text-xs font-semibold muted mb-2 uppercase tracking-wide">Your upcoming pre-defined entries</div>${rows}`;
+}
+
+async function checkPreConsumedLock(){
+  const date=document.getElementById('preDate').value;
+  const msg=document.getElementById('preLockMsg');
+  if(!date){ msg.classList.add('hidden'); return; }
+  try{
+    const r=await api('getPredefined',{date});
+    // backend will return error if admin already entered — we check separately
+    msg.classList.add('hidden');
+  }catch(e){ msg.classList.add('hidden'); }
+}
+
+async function savePredefined(){
+  const date=document.getElementById('preDate').value;
+  const qty=parseInt(document.getElementById('preQty').value)||0;
+  if(!date){ toast('Pick a date','error'); return; }
+  showLoading('Saving…');
+  try{
+    const r=await api('setPredefined',{date,qty});
+    if(r.success){ toast('Pre-defined saved ✓','success'); loadUserDashboard(); }
+    else toast(r.error,'error');
+  }catch(e){ toast('Saved (demo)','info'); }
+  hideLoading();
+}
+
+async function setOffPredefined(){
+  const date=document.getElementById('preDate').value;
+  if(!date){ toast('Pick a date','error'); return; }
+  document.getElementById('preQty').value='0';
+  await savePredefined();
+}
+
+async function clearPre(date){
+  showLoading();
+  try{
+    const r=await api('setPredefined',{date,qty:0});
+    if(r.success){ toast('Removed','success'); loadUserDashboard(); }
+    else toast(r.error,'error');
+  }catch(e){ toast('Removed (demo)','info'); }
+  hideLoading();
+}
+
+// ── CHANGE PASSWORD ───────────────────────────────────────────────────────────
+async function doChangePassword(){
+  const old=document.getElementById('pwOld').value;
+  const nw=document.getElementById('pwNew').value;
+  const cf=document.getElementById('pwConfirm').value;
+  if(!old||!nw||!cf){ toast('Fill all fields','error'); return; }
+  if(nw!==cf){ toast('New passwords do not match','error'); return; }
+  if(nw.length<4){ toast('Password too short (min 4 chars)','error'); return; }
+  showLoading('Updating password…');
+  try{
+    const r=await api('changePassword',{oldPassword:old,newPassword:nw});
+    if(r.success){ toast('Password updated ✓','success'); ['pwOld','pwNew','pwConfirm'].forEach(id=>document.getElementById(id).value=''); }
+    else toast(r.error,'error');
+  }catch(e){ toast('Updated (demo)','info'); }
+  hideLoading();
+}
+
+// ── DAILY CONSUMPTION ────────────────────────────────────────────────────────
+function initDailyPage(){
+  const picker=document.getElementById('dailyDatePicker');
+  // Always default to today
+  picker.value=todayStr();
+  document.getElementById('dailyDateLabel').textContent=formatDate(new Date());
+  loadDailyConsumption();
+}
+
+async function loadDailyConsumption(){
+  const date=document.getElementById('dailyDatePicker').value;
+  document.getElementById('dailyDateLabel').textContent=formatDate(new Date(date+'T00:00:00'));
+  document.getElementById('dailyConsTable').innerHTML='<div class="muted text-sm py-4 text-center">Loading…</div>';
+  document.getElementById('alreadyBadge').classList.add('hidden');
+  try{
+    const r=await api('getDailyConsumptionData',{date});
+    if(r.success){
+      usersCache=r.users;
+      if(r.hasExisting) document.getElementById('alreadyBadge').classList.remove('hidden');
+      renderDailyTable(r.users,r.existing,date);
+      updateBoilCount();
+    }
+  }catch(e){
+    const demo=[{userId:'U001',name:'Rahim',quota:6,predefined:6},{userId:'U002',name:'Karim',quota:4,predefined:0}];
+    usersCache=demo; renderDailyTable(demo,{},date); updateBoilCount(); toast('Demo mode','info');
+  }
+}
+
+function renderDailyTable(users,existing,date){
+  if(!users.length){ document.getElementById('dailyConsTable').innerHTML='<p class="muted text-sm py-4 text-center">No users</p>'; return; }
+  const rows=users.map(u=>{
+    const hasEx=existing.hasOwnProperty(u.userId);
+    let val=hasEx ? existing[u.userId] : (u.predefined>0 ? u.predefined : (u.quota??0));
+    const preBadge=(!hasEx&&u.predefined>0)?`<span class="pre-badge ml-1">🎯 ${u.predefined}</span>`:'';
+    const offRow=!hasEx&&u.predefined===0&&u.quota>0?'':'';//no special class now
+    return `<tr class="tbl-row">
+      <td>
+        <div class="flex items-center gap-2">
+          <div class="avatar" style="background:#fff3e0;color:#c54d00;width:32px;height:32px;font-size:.8rem">${u.name.charAt(0)}</div>
+          <div><div class="font-medium text-sm">${u.name}</div><div class="flex items-center gap-1 mt-0.5"><span class="muted text-xs">Quota: ${u.quota}</span>${preBadge}</div></div>
+        </div>
+      </td>
+      <td><input type="number" min="0" max="99" value="${val}" class="inp text-center font-mono font-bold" style="width:80px" id="cons_${u.userId}" onchange="updateBoilCount()"/></td>
+      <td><span class="tag px-2 py-1 rounded-lg text-xs">${val>0?'✓ Set':'✗ OFF'}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('dailyConsTable').innerHTML=`<table><thead class="tbl-head"><tr><th>User</th><th>Qty Consumed</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function updateBoilCount(){
+  let t=0; document.querySelectorAll('[id^="cons_"]').forEach(i=>{ t+=parseInt(i.value)||0; });
+  document.getElementById('totalBoilCount').textContent=t+' eggs';
+}
+
+async function submitConsumption(){
+  const date=document.getElementById('dailyDatePicker').value;
+  const entries=[];
+  document.querySelectorAll('[id^="cons_"]').forEach(inp=>entries.push({userId:inp.id.replace('cons_',''),qty:parseInt(inp.value)||0}));
+  showLoading('Saving…');
+  try{
+    const r=await api('saveConsumption',{date,entries});
+    if(r.success){ toast('Saved ✓','success'); document.getElementById('alreadyBadge').classList.remove('hidden'); }
+    else toast(r.error,'error');
+  }catch(e){ toast('Saved (demo)','info'); }
+  hideLoading();
+}
+
+// ── PAYMENTS ─────────────────────────────────────────────────────────────────
+async function loadPayments(){
+  document.getElementById('paymentsTable').innerHTML='<div class="muted text-sm py-4 text-center">Loading…</div>';
+  try{
+    const r=await api('getPayments');
+    if(r.success) renderPaymentsTable(r.payments); else toast(r.error,'error');
+  }catch(e){ renderPaymentsTable([{id:'P1',date:'2025-01-05',userName:'Rahim',amount:300}]); toast('Demo','info'); }
+}
+function renderPaymentsTable(p){
+  if(!p.length){ document.getElementById('paymentsTable').innerHTML='<p class="muted text-sm py-4 text-center">No payments</p>'; return; }
+  const total=p.reduce((s,x)=>s+Number(x.amount),0);
+  const rows=p.map(x=>`<tr class="tbl-row"><td>${x.date}</td><td>${x.userName||x.userId}</td><td class="font-mono font-semibold">৳${Number(x.amount).toLocaleString()}</td><td><button onclick="deletePayment('${x.id}')" class="btn btn-danger btn-sm">Del</button></td></tr>`).join('');
+  document.getElementById('paymentsTable').innerHTML=`<div class="badge-warm rounded-xl p-3 mb-4 inline-flex items-center gap-2"><span class="font-semibold text-sm">Total:</span><span class="font-bold font-mono">৳${total.toLocaleString()}</span></div><table><thead class="tbl-head"><tr><th>Date</th><th>User</th><th>Amount (৳)</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function openPaymentModal(){ populateUserSelect('pmtUser'); document.getElementById('pmtDate').value=todayStr(); document.getElementById('pmtAmount').value=''; openModal('paymentModal'); }
+async function savePayment(){
+  const userId=document.getElementById('pmtUser').value, date=document.getElementById('pmtDate').value, amount=parseFloat(document.getElementById('pmtAmount').value);
+  if(!userId||!date||!amount){ toast('Fill all fields','error'); return; }
+  showLoading(); try{ const r=await api('addPayment',{userId,date,amount}); if(r.success){ toast('Saved ✓','success'); closeModal('paymentModal'); loadPayments(); } else toast(r.error,'error'); }catch(e){ toast('Saved (demo)','info'); closeModal('paymentModal'); } hideLoading();
+}
+async function deletePayment(id){ if(!confirm('Delete?')) return; showLoading(); try{ const r=await api('deletePayment',{id}); if(r.success){ toast('Deleted','success'); loadPayments(); } else toast(r.error,'error'); }catch(e){ toast('Deleted (demo)','info'); } hideLoading(); }
+
+// ── EGG BUYS ─────────────────────────────────────────────────────────────────
+async function loadEggBuys(){
+  document.getElementById('eggBuysTable').innerHTML='<div class="muted text-sm py-4 text-center">Loading…</div>';
+  try{ const r=await api('getEggBuys'); if(r.success) renderBuysTable(r.buys); else toast(r.error,'error'); }
+  catch(e){ renderBuysTable([{id:'B1',date:'2025-01-03',qty:180,totalTK:1980,unitCost:11}]); toast('Demo','info'); }
+}
+function renderBuysTable(b){
+  if(!b.length){ document.getElementById('eggBuysTable').innerHTML='<p class="muted text-sm py-4 text-center">No purchases</p>'; return; }
+  const rows=b.map(x=>`<tr class="tbl-row"><td>${x.date}</td><td class="font-mono">${x.qty}</td><td class="font-mono">৳${Number(x.totalTK).toLocaleString()}</td><td class="font-mono font-semibold">৳${Number(x.unitCost).toFixed(2)}</td><td><button onclick="deleteBuy('${x.id}')" class="btn btn-danger btn-sm">Del</button></td></tr>`).join('');
+  document.getElementById('eggBuysTable').innerHTML=`<table><thead class="tbl-head"><tr><th>Date</th><th>Qty</th><th>Total (৳)</th><th>Unit Cost</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function openBuyModal(){ document.getElementById('buyDate').value=todayStr(); document.getElementById('buyQty').value=''; document.getElementById('buyTotal').value=''; document.getElementById('buyUnitCost').textContent='—'; openModal('buyModal'); }
+document.addEventListener('input',e=>{ if(e.target.id==='buyQty'||e.target.id==='buyTotal'){ const q=parseFloat(document.getElementById('buyQty').value),t=parseFloat(document.getElementById('buyTotal').value); document.getElementById('buyUnitCost').textContent=q&&t?(t/q).toFixed(2):'—'; } });
+async function saveBuy(){ const date=document.getElementById('buyDate').value,qty=parseInt(document.getElementById('buyQty').value),totalTK=parseFloat(document.getElementById('buyTotal').value); if(!date||!qty||!totalTK){ toast('Fill all fields','error'); return; } showLoading(); try{ const r=await api('addEggBuy',{date,qty,totalTK}); if(r.success){ toast('Recorded ✓','success'); closeModal('buyModal'); loadEggBuys(); } else toast(r.error,'error'); }catch(e){ toast('Saved (demo)','info'); closeModal('buyModal'); } hideLoading(); }
+async function deleteBuy(id){ if(!confirm('Delete?')) return; showLoading(); try{ const r=await api('deleteEggBuy',{id}); if(r.success){ toast('Deleted','success'); loadEggBuys(); } else toast(r.error,'error'); }catch(e){ toast('Deleted (demo)','info'); } hideLoading(); }
+
+// ── EGG DESTROY ──────────────────────────────────────────────────────────────
+async function loadEggDestroy(){
+  document.getElementById('eggDestroyTable').innerHTML='<div class="muted text-sm py-4 text-center">Loading…</div>';
+  try{ const r=await api('getEggDestroy'); if(r.success) renderDestroyTable(r.rows); else toast(r.error,'error'); }
+  catch(e){ renderDestroyTable([{id:'D1',date:'2025-01-06',qty:5,note:'Broken'}]); toast('Demo','info'); }
+}
+function renderDestroyTable(rows){
+  if(!rows.length){ document.getElementById('eggDestroyTable').innerHTML='<p class="muted text-sm py-4 text-center">No records</p>'; return; }
+  const html=rows.map(r=>`<tr class="tbl-row"><td>${r.date}</td><td><span class="badge-warm px-2 py-0.5 rounded-lg text-xs font-semibold">${r.qty} eggs</span></td><td class="muted text-sm">${r.note||'—'}</td><td><button onclick="deleteDestroy('${r.id}')" class="btn btn-danger btn-sm">Del</button></td></tr>`).join('');
+  document.getElementById('eggDestroyTable').innerHTML=`<table><thead class="tbl-head"><tr><th>Date</th><th>Qty</th><th>Note</th><th></th></tr></thead><tbody>${html}</tbody></table>`;
+}
+function openDestroyModal(){ document.getElementById('destroyDate').value=todayStr(); document.getElementById('destroyQty').value=''; document.getElementById('destroyNote').value=''; openModal('destroyModal'); }
+async function saveDestroy(){ const date=document.getElementById('destroyDate').value,qty=parseInt(document.getElementById('destroyQty').value),note=document.getElementById('destroyNote').value; if(!date||!qty){ toast('Fill date and qty','error'); return; } showLoading(); try{ const r=await api('addEggDestroy',{date,qty,note}); if(r.success){ toast('Recorded ✓','success'); closeModal('destroyModal'); loadEggDestroy(); } else toast(r.error,'error'); }catch(e){ toast('Saved (demo)','info'); closeModal('destroyModal'); } hideLoading(); }
+async function deleteDestroy(id){ if(!confirm('Delete?')) return; showLoading(); try{ const r=await api('deleteEggDestroy',{id}); if(r.success){ toast('Deleted','success'); loadEggDestroy(); } else toast(r.error,'error'); }catch(e){ toast('Deleted (demo)','info'); } hideLoading(); }
+
+// ── MISC COST ────────────────────────────────────────────────────────────────
+async function loadMiscCost(){
+  document.getElementById('miscCostTable').innerHTML='<div class="muted text-sm py-4 text-center">Loading…</div>';
+  try{ const r=await api('getMiscCost'); if(r.success) renderMiscTable(r.rows); else toast(r.error,'error'); }
+  catch(e){ renderMiscTable([{id:'M1',date:'2025-01-10',amount:80,note:'Gas'}]); toast('Demo','info'); }
+}
+function renderMiscTable(rows){
+  if(!rows.length){ document.getElementById('miscCostTable').innerHTML='<p class="muted text-sm py-4 text-center">No records</p>'; return; }
+  const total=rows.reduce((s,r)=>s+Number(r.amount),0);
+  const html=rows.map(r=>`<tr class="tbl-row"><td>${r.date}</td><td class="font-mono font-semibold">৳${Number(r.amount).toLocaleString()}</td><td class="muted text-sm">${r.note||'—'}</td><td><button onclick="deleteMisc('${r.id}')" class="btn btn-danger btn-sm">Del</button></td></tr>`).join('');
+  document.getElementById('miscCostTable').innerHTML=`<div class="badge-warm rounded-xl p-3 mb-4 inline-flex items-center gap-2"><span class="font-semibold text-sm">Total Misc:</span><span class="font-bold font-mono">৳${total.toLocaleString()}</span></div><table><thead class="tbl-head"><tr><th>Date</th><th>Amount (৳)</th><th>Note</th><th></th></tr></thead><tbody>${html}</tbody></table>`;
+}
+function openMiscModal(){ document.getElementById('miscDate').value=todayStr(); document.getElementById('miscAmount').value=''; document.getElementById('miscNote').value=''; openModal('miscModal'); }
+async function saveMisc(){ const date=document.getElementById('miscDate').value,amount=parseFloat(document.getElementById('miscAmount').value),note=document.getElementById('miscNote').value; if(!date||!amount){ toast('Fill date and amount','error'); return; } showLoading(); try{ const r=await api('addMiscCost',{date,amount,note}); if(r.success){ toast('Recorded ✓','success'); closeModal('miscModal'); loadMiscCost(); } else toast(r.error,'error'); }catch(e){ toast('Saved (demo)','info'); closeModal('miscModal'); } hideLoading(); }
+async function deleteMisc(id){ if(!confirm('Delete?')) return; showLoading(); try{ const r=await api('deleteMiscCost',{id}); if(r.success){ toast('Deleted','success'); loadMiscCost(); } else toast(r.error,'error'); }catch(e){ toast('Deleted (demo)','info'); } hideLoading(); }
+
+// ── FIFO REPORT ──────────────────────────────────────────────────────────────
+async function loadFifoReport(){
+  document.getElementById('fifoReportTable').innerHTML='<div class="muted text-sm py-4 text-center">Calculating FIFO…</div>';
+  try{ const r=await api('getFifoReport'); if(r.success) renderFifoTable(r.report,r.summary); else toast(r.error,'error'); }
+  catch(e){ renderFifoTable([{name:'Rahim',consumedQty:18,pct:50,eggCost:198,shareDest:20,shareMisc:15,totalCost:233,totalPaid:550,needToPay:183},{name:'Karim',consumedQty:15,pct:33,eggCost:165,shareDest:13,shareMisc:10,totalCost:188,totalPaid:200,needToPay:488}],{totalQtyConsumed:40,destroyCost:40,totalMiscCost:30}); toast('Demo','info'); }
+}
+function renderFifoTable(report,summary){
+  if(!report.length){ document.getElementById('fifoReportTable').innerHTML='<p class="muted text-sm py-4 text-center">No data</p>'; return; }
+  const sumHtml=summary?`<div class="grid grid-cols-3 gap-3 mb-5"><div class="stat-card badge-warm rounded-xl p-3 text-center"><div class="muted text-xs mb-1">Total Consumed</div><div class="font-bold text-lg font-mono">${summary.totalQtyConsumed}</div></div><div class="stat-card rounded-xl p-3 text-center" style="background:#fef2f2"><div class="muted text-xs mb-1">Destroy Cost</div><div class="font-bold text-lg font-mono text-red-500">৳${Number(summary.destroyCost).toLocaleString()}</div></div><div class="stat-card rounded-xl p-3 text-center" style="background:#eff6ff"><div class="muted text-xs mb-1">Misc Cost</div><div class="font-bold text-lg font-mono text-blue-500">৳${Number(summary.totalMiscCost).toLocaleString()}</div></div></div>`:'';
+  const rows=report.map(r=>`<tr class="tbl-row"><td class="font-medium">${r.name}</td><td class="font-mono">${r.consumedQty} <span class="muted text-xs">(${r.pct}%)</span></td><td class="font-mono">৳${Number(r.eggCost).toLocaleString()}</td><td class="font-mono text-red-400">৳${Number(r.shareDest).toLocaleString()}</td><td class="font-mono text-blue-400">৳${Number(r.shareMisc).toLocaleString()}</td><td class="font-mono font-semibold">৳${Number(r.totalCost).toLocaleString()}</td><td class="font-mono">৳${Number(r.totalPaid).toLocaleString()}</td><td class="font-mono font-bold" style="color:${r.needToPay>0?'#dc2626':'#16a34a'}">৳${Number(r.needToPay).toLocaleString()}</td></tr>`).join('');
+  document.getElementById('fifoReportTable').innerHTML=sumHtml+`<div class="overflow-x-auto"><table><thead class="tbl-head"><tr><th>User</th><th>Consumed</th><th>Egg Cost</th><th>Destroy</th><th>Misc</th><th>Total Cost</th><th>Paid</th><th>Need to Pay</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+async function refreshFifoSheet(){ showLoading('Syncing to Excel…'); try{ const r=await api('refreshFifoSheet'); if(r.success) toast('FIFO sheet updated ✓','success'); else toast(r.error,'error'); }catch(e){ toast('Error','error'); } hideLoading(); }
+
+// ── USERS ────────────────────────────────────────────────────────────────────
+async function loadUsers(){
+  document.getElementById('usersTable').innerHTML='<div class="muted text-sm py-4 text-center">Loading…</div>';
+  try{ const r=await api('getUsers'); if(r.success){ usersCache=r.users; renderUsersTable(r.users); } else toast(r.error,'error'); }
+  catch(e){ renderUsersTable([{userId:'U001',username:'rahim',name:'Rahim',role:'user',target:500,initBalance:0}]); toast('Demo','info'); }
+}
+function renderUsersTable(users){
+  const rows=users.map(u=>`<tr class="tbl-row"><td><div class="flex items-center gap-2"><div class="avatar" style="background:#fff3e0;color:#c54d00">${u.name.charAt(0)}</div><div><div class="font-medium text-sm">${u.name}</div><div class="muted text-xs">${u.username}</div></div></div></td><td><span class="tag px-2 py-0.5 rounded-lg text-xs font-semibold capitalize">${u.role}</span></td><td class="font-mono">৳${Number(u.target||0).toLocaleString()}</td><td class="font-mono">৳${Number(u.initBalance||0).toLocaleString()}</td><td><div class="flex gap-2"><button onclick="openEditUser('${u.userId}')" class="btn btn-ghost btn-sm">Edit</button><button onclick="deleteUser('${u.userId}')" class="btn btn-danger btn-sm">Del</button></div></td></tr>`).join('');
+  document.getElementById('usersTable').innerHTML=`<table><thead class="tbl-head"><tr><th>User</th><th>Role</th><th>Target (৳)</th><th>Balance (৳)</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function openUserModal(){ document.getElementById('userModalTitle').textContent='Create User'; document.getElementById('editUserId').value=''; ['newUsername','newName','newPassword','newTarget','newBalance'].forEach(id=>document.getElementById(id).value=''); document.getElementById('newRole').value='user'; openModal('userModal'); }
+function openEditUser(userId){ const u=usersCache.find(x=>x.userId===userId); if(!u) return; document.getElementById('userModalTitle').textContent='Edit User'; document.getElementById('editUserId').value=u.userId; document.getElementById('newUsername').value=u.username; document.getElementById('newName').value=u.name; document.getElementById('newPassword').value=''; document.getElementById('newRole').value=u.role; document.getElementById('newTarget').value=u.target||0; document.getElementById('newBalance').value=u.initBalance||0; openModal('userModal'); }
+async function saveUser(){ const userId=document.getElementById('editUserId').value,payload={userId,username:document.getElementById('newUsername').value.trim(),name:document.getElementById('newName').value.trim(),password:document.getElementById('newPassword').value,role:document.getElementById('newRole').value,target:parseFloat(document.getElementById('newTarget').value)||0,initBalance:parseFloat(document.getElementById('newBalance').value)||0}; if(!payload.username||!payload.name){ toast('Username and name required','error'); return; } showLoading(userId?'Updating…':'Creating…'); try{ const r=await api(userId?'updateUser':'createUser',payload); if(r.success){ toast((userId?'Updated':'Created')+' ✓','success'); closeModal('userModal'); loadUsers(); } else toast(r.error,'error'); }catch(e){ toast('Saved (demo)','info'); closeModal('userModal'); } hideLoading(); }
+async function deleteUser(userId){ if(!confirm('Delete user?')) return; showLoading(); try{ const r=await api('deleteUser',{userId}); if(r.success){ toast('Deleted','success'); loadUsers(); } else toast(r.error,'error'); }catch(e){ toast('Deleted (demo)','info'); } hideLoading(); }
+
+// ── QUOTAS ───────────────────────────────────────────────────────────────────
+async function loadQuotas(){
+  document.getElementById('quotasTable').innerHTML='<div class="muted text-sm py-4 text-center">Loading…</div>';
+  try{ const r=await api('getQuotas'); if(r.success){ usersCache=r.users; renderQuotasTable(r.users); } else toast(r.error,'error'); }
+  catch(e){ renderQuotasTable([{userId:'U001',name:'Rahim',role:'user',quota:6}]); toast('Demo','info'); }
+}
+function renderQuotasTable(users){
+  const rows=users.map(u=>`<tr class="tbl-row"><td><div class="flex items-center gap-2"><div class="avatar" style="background:#fff3e0;color:#c54d00;width:32px;height:32px;font-size:.8rem">${u.name.charAt(0)}</div><span class="font-medium text-sm">${u.name}</span></div></td><td><input type="number" min="0" max="99" value="${u.quota||0}" id="quota_${u.userId}" class="inp text-center font-mono font-bold" style="width:80px"/></td><td><span class="tag px-2 py-0.5 rounded-lg text-xs capitalize">${u.role}</span></td></tr>`).join('');
+  document.getElementById('quotasTable').innerHTML=`<table><thead class="tbl-head"><tr><th>User</th><th>Daily Quota</th><th>Role</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+async function saveAllQuotas(){ const quotas=[]; document.querySelectorAll('[id^="quota_"]').forEach(inp=>quotas.push({userId:inp.id.replace('quota_',''),quota:parseInt(inp.value)||0})); showLoading(); try{ const r=await api('saveQuotas',{quotas}); if(r.success) toast('Quotas saved ✓','success'); else toast(r.error,'error'); }catch(e){ toast('Saved (demo)','info'); } hideLoading(); }
+
+function openQuotaModal(){ if(new Date().getHours()>=9){ toast('Quota locked after 9:00 AM','error'); return; } openModal('quotaModal'); }
+async function saveQuota(){ const qty=parseInt(document.getElementById('quotaInput').value)||0; showLoading(); try{ const r=await api('setUserQuota',{userId:session.userId,qty}); if(r.success){ toast('Quota updated ✓','success'); closeModal('quotaModal'); loadUserDashboard(); } else toast(r.error,'error'); }catch(e){ toast('Saved (demo)','info'); closeModal('quotaModal'); } hideLoading(); }
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function populateUserSelect(selectId){
+  const sel=document.getElementById(selectId);
+  const users=(usersCache.length?usersCache:[]).filter(u=>u.role!=='superadmin');
+  sel.innerHTML=users.map(u=>`<option value="${u.userId}">${u.name}</option>`).join('');
+}
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-bg').forEach(bg=>{ bg.addEventListener('click',function(e){ if(e.target===this) this.classList.add('hidden'); }); });
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function formatDate(d){ return d.toLocaleDateString('en-BD',{weekday:'long',year:'numeric',month:'long',day:'numeric'}); }
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!document.getElementById('loginPage').classList.contains('hidden')) doLogin();
+  if(e.key==='Escape') document.querySelectorAll('.modal-bg').forEach(m=>m.classList.add('hidden'));
+});
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+(function boot(){
+  initTheme();
+  const saved=localStorage.getItem('session');
+  if(saved){ try{ session=JSON.parse(saved); showApp(); }catch(e){ localStorage.removeItem('session'); } }
+})();
+</script>
+</body>
+</html>
