@@ -640,7 +640,9 @@ async function loadAdminDashboard(){
     const r=await api('getAdminDashboard');
     if(!r.success){ toast(r.error,'error'); return; }
     const d=r.data;
-    document.getElementById('adCashInHand').textContent     ='৳'+d.cashInHand.toLocaleString();
+    //console.log(d);
+    const mcashInHand = d.totalCollected - d.totalSpentOnEggs - d.totalMisc;
+    document.getElementById('adCashInHand').textContent     ='৳'+mcashInHand.toLocaleString();
     document.getElementById('adTotalCost').textContent      ='৳'+d.totalCostFifo.toLocaleString();
     document.getElementById('adTotalCollected').textContent ='৳'+d.totalCollected.toLocaleString();
     document.getElementById('adTotalOutstanding').textContent='৳'+d.totalOutstanding.toLocaleString();
