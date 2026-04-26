@@ -69,12 +69,142 @@ function doGet(e) {
       case 'setUserQuota':            return makeResponse(setUserQuota(body, user));
       case 'getPredefined':           return makeResponse(getPredefined(body, user));
       case 'setPredefined':           return makeResponse(setPredefined(body, user));
+      case 'getWeeklySummary': return makeResponse(getWeeklySummary(user));
+      case 'getLast7DaysConsumption': return makeResponse(getLast7DaysConsumption(user));
       default: return makeResponse({ success: false, error: 'Unknown action: ' + action });
     }
   } catch (err) {
     return makeResponse({ success: false, error: 'Server error: ' + err.message });
   }
 }
+
+//========================================================================
+
+// Add this function to bcak.gs - get last 7 days consumption for all users
+function getLast7DaysConsumption(user) {
+  // Both admin and regular users can see this
+  const targetUserId = user.role === 'user' ? user.userId : null;
+  
+  const consSh = SS2.getSheetByName(SHEETS.CONSUMPTION);
+  const rows = consSh.getDataRange().getValues().slice(1);
+  
+  // Get all user names
+  const userNames = {};
+  const allUsers = getAllUsers();
+  allUsers.forEach(u => { userNames[u.userId] = u.name; });
+  
+  // Get last 7 dates (including today)
+  const dates = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dates.push(fmtDate(d));
+  }
+  
+  // Build consumption matrix
+  const result = {
+    dates: dates,
+    users: [],
+    matrix: {}
+  };
+  
+  // Filter users
+  let relevantUsers = allUsers.filter(u => u.role !== 'superadmin');
+  if (targetUserId) {
+    relevantUsers = relevantUsers.filter(u => u.userId === targetUserId);
+  }
+  
+  relevantUsers.forEach(user => {
+    const userId = user.userId;
+    result.users.push({
+      userId: userId,
+      name: user.name,
+      quota: targetUserId ? getQuotaForUser(userId) : null
+    });
+    
+    result.matrix[userId] = {};
+    dates.forEach(date => {
+      result.matrix[userId][date] = { qty: 0, filled: false };
+    });
+  });
+  
+  // Fill consumption data
+  rows.forEach(row => {
+    const userId = String(row[2]);
+    const date = fmtDate(row[1]);
+    const qty = Number(row[3]);
+    
+    if (result.matrix[userId] && result.matrix[userId][date]) {
+      result.matrix[userId][date] = { qty: qty, filled: true };
+    }
+  });
+  
+  return { success: true, data: result };
+}
+
+// Add to doGet() switch case:
+// case 'getLast7DaysConsumption': return makeResponse(getLast7DaysConsumption(user));
+
+
+
+// Add to doGet() after getLast7DaysConsumption
+// case 'getWeeklySummary': return makeResponse(getWeeklySummary(user));
+
+function getWeeklySummary(user) {
+  requireAdmin(user);
+  
+  const consSh = SS2.getSheetByName(SHEETS.CONSUMPTION);
+  const rows = consSh.getDataRange().getValues().slice(1);
+  
+  const dates = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dates.push(fmtDate(d));
+  }
+  
+  const userNames = {};
+  const allUsers = getAllUsers();
+  allUsers.forEach(u => { userNames[u.userId] = u.name; });
+  
+  const dailyTotals = {};
+  dates.forEach(date => { dailyTotals[date] = 0; });
+  
+  const userDaily = {};
+  
+  rows.forEach(row => {
+    const userId = String(row[2]);
+    const date = fmtDate(row[1]);
+    const qty = Number(row[3]);
+    
+    if (dates.includes(date)) {
+      dailyTotals[date] += qty;
+      
+      if (!userDaily[userId]) userDaily[userId] = {};
+      userDaily[userId][date] = (userDaily[userId][date] || 0) + qty;
+    }
+  });
+  
+  // Get top consumers
+  const userTotals = [];
+  for (const userId in userDaily) {
+    let total = 0;
+    for (const date in userDaily[userId]) total += userDaily[userId][date];
+    userTotals.push({ userId, name: userNames[userId] || userId, total });
+  }
+  userTotals.sort((a,b) => b.total - a.total);
+  
+  return { 
+    success: true, 
+    data: {
+      dates: dates,
+      dailyTotals: dailyTotals,
+      topConsumers: userTotals.slice(0, 5)
+    }
+  };
+}
+
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SETUP

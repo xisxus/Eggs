@@ -148,7 +148,7 @@ html.dark .pre-badge{background:#2e1065;color:#c4b5fd}
   <aside class="sidebar hidden md:flex flex-col w-60 min-h-screen p-4 fixed left-0 top-0 bottom-0 overflow-y-auto" id="desktopSidebar">
     <div id="desktopSidebarContent"></div>
   </aside>
-  <main class="flex-1 flex flex-col md:ml-60">
+  <main class="flex-1 flex flex-col ">
     <header class="glass sticky top-0 z-30 flex items-center justify-between px-5 py-3 border-b divider">
       <div class="flex items-center gap-3">
         <button class="md:hidden btn btn-ghost btn-sm p-2" onclick="openSidebar()">☰</button>
@@ -182,20 +182,54 @@ html.dark .pre-badge{background:#2e1065;color:#c4b5fd}
             <div class="text-6xl opacity-20">💵</div>
           </div>
         </div>
+
         <!-- Money row -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <div class="stat-card card"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Egg Cost</div><div class="text-xl font-bold font-mono" id="adTotalCost">—</div><div class="muted text-xs mt-1">FIFO calculated</div></div>
-          <div class="stat-card card" style="background:#f0fdf4"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Collected</div><div class="text-xl font-bold font-mono text-green-600" id="adTotalCollected">—</div><div class="muted text-xs mt-1">payments in</div></div>
-          <div class="stat-card card" style="background:#fef2f2"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Outstanding</div><div class="text-xl font-bold font-mono text-red-500" id="adTotalOutstanding">—</div><div class="muted text-xs mt-1">total dues</div></div>
-          <div class="stat-card card" style="background:#eff6ff"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Misc Spent</div><div class="text-xl font-bold font-mono text-blue-500" id="adTotalMisc">—</div></div>
+          <div class="stat-card card" ><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Collected</div><div class="text-xl font-bold font-mono text-green-600" id="adTotalCollected">—</div><div class="muted text-xs mt-1">payments in</div></div>
+          <div class="stat-card card" ><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Outstanding</div><div class="text-xl font-bold font-mono text-red-500" id="adTotalOutstanding">—</div><div class="muted text-xs mt-1">total dues</div></div>
+          <div class="stat-card card" ><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Misc Spent</div><div class="text-xl font-bold font-mono text-blue-500" id="adTotalMisc">—</div></div>
         </div>
         <!-- Stock row -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
           <div class="stat-card card"><div class="text-2xl mb-1">🛒</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Bought</div><div class="text-xl font-bold font-mono" id="adTotalBought">—</div></div>
           <div class="stat-card card"><div class="text-2xl mb-1">🍳</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Consumed</div><div class="text-xl font-bold font-mono" id="adTotalConsumed">—</div></div>
-          <div class="stat-card card" style="background:#fef2f2"><div class="text-2xl mb-1">🗑️</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Destroyed</div><div class="text-xl font-bold font-mono text-red-500" id="adTotalDestroyed">—</div></div>
-          <div class="stat-card card" style="background:#f0fdf4"><div class="text-2xl mb-1">📦</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">In Stock</div><div class="text-xl font-bold font-mono text-green-600" id="adStock">—</div></div>
+          <div class="stat-card card" ><div class="text-2xl mb-1">🗑️</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Destroyed</div><div class="text-xl font-bold font-mono text-red-500" id="adTotalDestroyed">—</div></div>
+          <div class="stat-card card" ><div class="text-2xl mb-1">📦</div><div class="muted text-xs font-medium uppercase tracking-wide mb-1">In Stock</div><div class="text-xl font-bold font-mono text-green-600" id="adStock">—</div></div>
         </div>
+
+        <!-- Add after Recent Activity card in pgAdminDash -->
+          <div class="card p-5 mt-4 col-span-1 md:col-span-2">
+            <h3 class="font-semibold mb-4">📊 Last 7 Days - All Users Consumption</h3>
+            
+            <!-- Daily total summary -->
+            <div class="mb-5">
+              <div class="flex items-center justify-between text-xs muted mb-2">
+                <span>📈 Daily totals (all users)</span>
+                <span id="adminWeeklyTotalLabel">Total: — eggs</span>
+              </div>
+              <div class="flex gap-1 items-end h-20" id="adminWeeklyBars"></div>
+            </div>
+            
+            <!-- Top consumers -->
+            <div class="mb-4 p-3 rounded-xl" style="background:#fef3c7;color:#92400e">
+              <div class="text-xs font-semibold uppercase tracking-wide mb-2">🏆 Top 5 Consumers (Last 7 Days)</div>
+              <div id="topConsumersList" class="space-y-1"></div>
+            </div>
+            
+            <!-- Detailed user table -->
+            <div class="overflow-x-auto mt-4">
+              <table class="w-full text-sm" id="adminWeeklyTable">
+                <thead class="tbl-head">
+                  <tr id="adminWeeklyHeader"></tr>
+                </thead>
+                <tbody id="adminWeeklyBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="card p-5"><h3 class="font-semibold mb-4">💳 User Balances</h3><div id="adUserBalances"><div class="muted text-sm py-4 text-center">Loading…</div></div></div>
           <div class="card p-5"><h3 class="font-semibold mb-4">🕐 Recent Activity</h3><div id="adRecentActivity"><div class="muted text-sm py-4 text-center">Loading…</div></div></div>
@@ -253,7 +287,7 @@ html.dark .pre-badge{background:#2e1065;color:#c4b5fd}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <div class="stat-card card"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Consumed</div><div class="text-xl font-bold font-mono" id="dashTotalConsumed">—</div><div class="muted text-xs mt-1">eggs all time</div></div>
           <div class="stat-card card"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Est. Cost</div><div class="text-xl font-bold font-mono" id="dashEstCost">—</div></div>
-          <div class="stat-card card" style="background:#f0fdf4"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Paid</div><div class="text-xl font-bold font-mono text-green-600" id="dashTotalPaid">—</div></div>
+          <div class="stat-card card" ><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Total Paid</div><div class="text-xl font-bold font-mono text-green-600" id="dashTotalPaid">—</div></div>
           <div class="stat-card card" id="dashBalCard"><div class="muted text-xs font-medium uppercase tracking-wide mb-1">Balance</div><div class="text-xl font-bold font-mono" id="dashBalance">—</div><div class="muted text-xs mt-1" id="dashBalLabel">—</div></div>
         </div>
 
@@ -273,6 +307,35 @@ html.dark .pre-badge{background:#2e1065;color:#c4b5fd}
           <h3 class="font-semibold mb-4">📅 Recent Consumption</h3>
           <div id="dashRecentTable"><div class="muted text-sm py-4 text-center">Loading…</div></div>
         </div>
+
+        <!-- Add after the existing "Recent Consumption" card in pgDashboard -->
+        <div class="card p-5 mt-4">
+          <h3 class="font-semibold mb-4">📊 Last 7 Days - Your Consumption</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full" id="weeklyConsTable">
+              <thead class="tbl-head">
+                <tr>
+                  <th class="px-2 py-2">Date</th>
+                  <th class="px-2 py-2 text-center">Consumed</th>
+                  <th class="px-2 py-2 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="weeklyConsBody">
+                <tr><td colspan="3" class="text-center muted py-4">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Weekly chart / bar -->
+          <div class="mt-4 pt-3 border-t divider">
+            <div class="flex items-center justify-between text-xs muted mb-2">
+              <span>📈 Weekly trend</span>
+              <span id="weeklyTotalLabel">Total: — eggs</span>
+            </div>
+            <div class="flex gap-1 items-end h-16" id="weeklyBars"></div>
+          </div>
+        </div>
+
+
       </div>
 
       <!-- DAILY CONSUMPTION -->
@@ -482,7 +545,7 @@ html.dark .pre-badge{background:#2e1065;color:#c4b5fd}
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────────
-const API_URL = "https://script.google.com/macros/s/AKfycbye_yD2mLvP8TSMzNwY0gq8BT08_tl79WvRAHannnxkGxsTux7un24WHYcNxKbuYwIi/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbx8pAGXQsBtcVH3PLd7wXZucIoEY1t_wlSaX2hljP4dwDRMbwkwAyV89LIbXeaDRLd9/exec";
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let session = null;
@@ -501,6 +564,172 @@ function initTheme(){
 function toggleDark(){
   localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'light':'dark');
   initTheme();
+}
+
+//===========================================================
+
+// Add these functions after loadUserDashboard()
+
+async function loadUserWeeklyConsumption() {
+  try {
+    const r = await api('getLast7DaysConsumption');
+    if (r.success) {
+      renderUserWeeklyTable(r.data);
+    }
+  } catch(e) {
+    // Demo data
+    const demoData = {
+      dates: getLast7Dates(),
+      users: [{ userId: session.userId, name: session.name }],
+      matrix: {}
+    };
+    demoData.matrix[session.userId] = {};
+    demoData.dates.forEach(date => {
+      demoData.matrix[session.userId][date] = { qty: Math.floor(Math.random() * 8), filled: true };
+    });
+    renderUserWeeklyTable(demoData);
+  }
+}
+
+function renderUserWeeklyTable(data) {
+  const { dates, users, matrix } = data;
+  const userId = users[0]?.userId;
+  const userData = matrix[userId] || {};
+  
+  let total = 0;
+  const rows = dates.map(date => {
+    const entry = userData[date] || { qty: 0, filled: false };
+    total += entry.qty;
+    const status = entry.filled ? 
+      `<span class="badge-warm px-2 py-0.5 rounded-lg text-xs">✅ ${entry.qty} eggs</span>` : 
+      `<span class="muted text-xs">⏳ Not entered</span>`;
+    const barWidth = Math.min((entry.qty / 12) * 100, 100);
+    return `<tr class="tbl-row border-b">
+      <td><span class="font-mono text-sm">${date}</span></td>
+      <td class="text-center font-mono font-semibold">${entry.filled ? entry.qty : '—'}</td>
+      <td class="text-center">${status}</td>
+    </tr>`;
+  }).join('');
+  
+  document.getElementById('weeklyConsBody').innerHTML = rows;
+  document.getElementById('weeklyTotalLabel').innerHTML = `Total: ${total} eggs`;
+  
+  // Render bars
+  const maxVal = Math.max(...dates.map(d => (userData[d]?.qty || 0)), 1);
+  const barsHtml = dates.map(date => {
+    const qty = userData[date]?.qty || 0;
+    const height = (qty / maxVal) * 56;
+    return `<div class="flex-1 flex flex-col items-center gap-1">
+      <div class="w-full bg-orange-200 dark:bg-orange-900/40 rounded-t" style="height: ${height}px; transition: height 0.3s"></div>
+      <div class="text-[10px] muted">${date.slice(5)}</div>
+      <div class="text-[10px] font-mono font-bold">${qty}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('weeklyBars').innerHTML = barsHtml;
+}
+
+async function loadAdminWeeklySummary() {
+  debugger
+  try {
+    const r = await api('getWeeklySummary');
+    if (r.success) {
+      renderAdminWeeklyTable(r.data);
+    }
+  } catch(e) {
+    // Demo data
+    const dates = getLast7Dates();
+    const dailyTotals = {};
+    dates.forEach((date, i) => { dailyTotals[date] = [5, 8, 6, 12, 9, 7, 10][i] || 6; });
+    const topConsumers = [
+      { name: 'Rahim', total: 45 },
+      { name: 'Karim', total: 38 },
+      { name: 'John', total: 32 }
+    ];
+    renderAdminWeeklyTable({ dates, dailyTotals, topConsumers });
+  }
+}
+
+function renderAdminWeeklyTable(data) {
+  const { dates, dailyTotals, topConsumers } = data;
+  
+  // Header row
+  const headerHtml = `<th class="px-2 py-2">User</th>${dates.map(d => `<th class="px-2 py-2 text-center text-xs">${d.slice(5)}</th>`).join('')}<th class="px-2 py-2 text-center">Total</th>`;
+  document.getElementById('adminWeeklyHeader').innerHTML = headerHtml;
+  
+  // We need to fetch all users consumption
+  // For demo, show placeholder
+  document.getElementById('adminWeeklyBody').innerHTML = '<tr><td colspan="8" class="text-center muted py-4">Loading user details...</td></tr>';
+  
+  // Actually load full data
+  loadFullAdminWeekly(dates);
+  
+  // Daily totals bars
+  const maxTotal = Math.max(...Object.values(dailyTotals), 1);
+  const barsHtml = dates.map(date => {
+    const total = dailyTotals[date] || 0;
+    const height = (total / maxTotal) * 72;
+    return `<div class="flex-1 flex flex-col items-center gap-1">
+      <div class="w-full bg-brand-400 rounded-t" style="height: ${height}px; transition: height 0.3s"></div>
+      <div class="text-[10px] muted">${date.slice(5)}</div>
+      <div class="text-[10px] font-mono font-bold">${total}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('adminWeeklyBars').innerHTML = barsHtml;
+  
+  // Top consumers
+  const topHtml = (topConsumers || []).map((u, i) => 
+    `<div class="flex items-center justify-between py-1">
+      <div class="flex items-center gap-2">
+        <span class="text-sm">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📌'}</span>
+        <span class="font-medium">${u.name}</span>
+      </div>
+      <span class="font-mono font-bold">${u.total} eggs</span>
+    </div>`
+  ).join('');
+  document.getElementById('topConsumersList').innerHTML = topHtml || '<div class="muted text-sm">No data yet</div>';
+  
+  document.getElementById('adminWeeklyTotalLabel').innerHTML = `Total: ${Object.values(dailyTotals).reduce((a,b) => a+b, 0)} eggs`;
+}
+
+async function loadFullAdminWeekly(dates) {
+  try {
+    const r = await api('getLast7DaysConsumption');
+    if (r.success && r.data.users.length) {
+      const { users, matrix } = r.data;
+      const rows = users.map(user => {
+        let userTotal = 0;
+        const cells = dates.map(date => {
+          const entry = matrix[user.userId]?.[date] || { qty: 0, filled: false };
+          userTotal += entry.qty;
+          const bgClass = entry.filled ? 'bg-orange-100 dark:bg-orange-900/30' : '';
+          return `<td class="text-center py-2 ${bgClass}">
+            <span class="font-mono text-sm ${entry.filled ? 'font-semibold' : 'muted'}">${entry.filled ? entry.qty : '—'}</span>
+          </td>`;
+        }).join('');
+        return `<tr class="tbl-row border-b">
+          <td class="font-medium py-2">${user.name}</td>
+          ${cells}
+          <td class="text-center font-mono font-bold">${userTotal}</td>
+        </tr>`;
+      }).join('');
+      
+      document.getElementById('adminWeeklyBody').innerHTML = rows;
+    } else {
+      document.getElementById('adminWeeklyBody').innerHTML = '<tr><td colspan="8" class="text-center muted py-4">No consumption data yet</td></tr>';
+    }
+  } catch(e) {
+    document.getElementById('adminWeeklyBody').innerHTML = '<tr><td colspan="8" class="text-center muted py-4">Demo mode - no data</td></tr>';
+  }
+}
+
+function getLast7Dates() {
+  const dates = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().split('T')[0]);
+  }
+  return dates;
 }
 
 // ── TOAST ───────────────────────────────────────────────────────────────────
@@ -620,8 +849,14 @@ function closeSidebar(){ document.getElementById('sidebarOverlay').classList.rem
 
 function loadPageData(page){
   switch(page){
-    case 'pgAdminDash':  loadAdminDashboard(); break;
-    case 'pgDashboard':  loadUserDashboard(); break;
+    case 'pgAdminDash':  
+      loadAdminDashboard(); 
+      loadAdminWeeklySummary();  // Add this
+      break;
+    case 'pgDashboard':  
+      loadUserDashboard(); 
+      loadUserWeeklyConsumption();  // Add this
+      break;
     case 'pgDailyInput': initDailyPage(); break;
     case 'pgPayments':   loadPayments(); break;
     case 'pgEggBuys':    loadEggBuys(); break;
@@ -632,7 +867,6 @@ function loadPageData(page){
     case 'pgQuotas':     loadQuotas(); break;
   }
 }
-
 // ── ADMIN DASHBOARD ──────────────────────────────────────────────────────────
 async function loadAdminDashboard(){
   ['adCashInHand','adTotalCost','adTotalCollected','adTotalOutstanding','adTotalMisc','adTotalBought','adTotalConsumed','adTotalDestroyed','adStock'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent='…'; });
