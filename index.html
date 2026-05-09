@@ -102,6 +102,7 @@ html.dark .pre-badge{background:#2e1065;color:#c4b5fd}
   .sidebar-wrap.open{display:flex}
   .sidebar{width:260px;height:100vh;overflow-y:auto}
 }
+.d-none{  display: none;}
 </style>
 </head>
 <body>
@@ -179,7 +180,15 @@ html.dark .pre-badge{background:#2e1065;color:#c4b5fd}
               <div class="text-4xl font-bold font-mono" id="adCashInHand">—</div>
               <div class="text-xs opacity-60 mt-1">Total received − egg purchases − misc costs</div>
             </div>
-            <div class="text-6xl opacity-20">💵</div>
+
+            <div>
+              <div class="text-xs font-semibold uppercase tracking-widest opacity-70 mb-1">💵 In Stock</div>
+              <div class="text-4xl font-bold font-mono" id="adStock">—</div>
+              <div class="text-xs opacity-60 mt-1">egg Bought − egg Consumed − egg Destroyed</div>
+            </div>
+
+
+            <!-- <div class="text-6xl opacity-20">💵</div> -->
           </div>
         </div>
 
@@ -887,9 +896,16 @@ async function loadAdminDashboard(){
     document.getElementById('adStock').textContent          =d.stockRemaining.toLocaleString()+' eggs';
     const balRows=(d.userBalances||[]).map(u=>{
       const color=u.needToPay>0?'color:#b91c1c':'color:#166534';
-      return `<tr class="tbl-row"><td class="font-medium text-sm">${u.name}</td><td class="font-mono text-sm">${u.consumedQty}</td><td class="font-mono text-sm">৳${u.totalCost.toLocaleString()}</td><td class="font-mono text-sm">৳${u.totalPaid.toLocaleString()}</td><td class="font-mono font-bold text-sm" style="${color}">৳${Math.abs(u.needToPay).toLocaleString()} <span class="text-xs font-normal">${u.needToPay>0?'Owes':'Credit'}</span></td></tr>`;
+      return `<tr class="tbl-row">
+                <td class="font-medium text-sm">${u.name}</td>
+                <td class="font-mono text-sm">${u.consumedQty}</td>
+                <td class="font-mono text-sm">৳${u.totalCost.toLocaleString()}</td>
+                <td class="font-mono text-sm">৳${u.totalPaid.toLocaleString()}</td>
+                <td class="font-mono text-sm" style="color:${(u.totalPaid - u.totalCost) < 0 ? 'red' : 'inherit'}">৳${(u.totalPaid - u.totalCost).toLocaleString()}</td>
+                <td class="font-mono font-bold text-sm" style="${color}">৳${Math.abs(u.needToPay).toLocaleString()} <span class="text-xs font-normal">${u.needToPay>0?'Owes':'Credit'}</span></td>
+              </tr>`;
     }).join('');
-    document.getElementById('adUserBalances').innerHTML=balRows?`<table><thead class="tbl-head"><tr><th>User</th><th>Qty</th><th>Cost</th><th>Paid</th><th>Balance</th></tr></thead><tbody>${balRows}</tbody></table>`:'<p class="muted text-sm py-4 text-center">No data</p>';
+    document.getElementById('adUserBalances').innerHTML=balRows?`<table><thead class="tbl-head"><tr><th>User</th><th>Qty</th><th>Cost</th><th>Paid</th><th>Balance</th><th>Outstanding</th></tr></thead><tbody>${balRows}</tbody></table>`:'<p class="muted text-sm py-4 text-center">No data</p>';
     const actRows=(d.recentActivity||[]).map(a=>`<div class="flex items-center justify-between py-2 border-b divider last:border-0"><div class="flex items-center gap-2"><div class="avatar" style="background:#fff3e0;color:#c54d00;width:30px;height:30px;font-size:.75rem">${a.userName.charAt(0)}</div><div><div class="font-medium text-sm">${a.userName}</div><div class="muted text-xs">${a.date}</div></div></div><span class="badge-warm px-2 py-0.5 rounded-lg text-xs font-semibold">${a.qty} eggs</span></div>`).join('');
     document.getElementById('adRecentActivity').innerHTML=actRows||'<p class="muted text-sm py-4 text-center">No activity</p>';
   }catch(e){
@@ -1104,7 +1120,7 @@ async function loadPayments(){
 function renderPaymentsTable(p){
   if(!p.length){ document.getElementById('paymentsTable').innerHTML='<p class="muted text-sm py-4 text-center">No payments</p>'; return; }
   const total=p.reduce((s,x)=>s+Number(x.amount),0);
-  const rows=p.map(x=>`<tr class="tbl-row"><td>${x.date}</td><td>${x.userName||x.userId}</td><td class="font-mono font-semibold">৳${Number(x.amount).toLocaleString()}</td><td><button onclick="deletePayment('${x.id}')" class="btn btn-danger btn-sm">Del</button></td></tr>`).join('');
+  const rows=p.map(x=>`<tr class="tbl-row"><td>${x.date}</td><td>${x.userName||x.userId}</td><td class="font-mono font-semibold">৳${Number(x.amount).toLocaleString()}</td><td><button onclick="deletePayment('${x.id}')" class="btn btn-danger btn-sm d-none">Del</button></td></tr>`).join('');
   document.getElementById('paymentsTable').innerHTML=`<div class="badge-warm rounded-xl p-3 mb-4 inline-flex items-center gap-2"><span class="font-semibold text-sm">Total:</span><span class="font-bold font-mono">৳${total.toLocaleString()}</span></div><table><thead class="tbl-head"><tr><th>Date</th><th>User</th><th>Amount (৳)</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function openPaymentModal(){ populateUserSelect('pmtUser'); document.getElementById('pmtDate').value=todayStr(); document.getElementById('pmtAmount').value=''; openModal('paymentModal'); }
